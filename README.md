@@ -1,7 +1,5 @@
 # Getting Started
-Modified version of *Spring Boot Webflux/Dynamo Tutorial* found here https://www.viralpatel.net/spring-boot-webflux-dynamodb/
-
-Some code also stolen from here https://byegor.github.io/2020/02/21/spring-dynamodb-async.html
+AWS v1 and v2 SDK usage for DynamoDB
 
 ## Download DynamodDB Locally
 https://s3.us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.tar.gz
@@ -12,18 +10,14 @@ https://s3.us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.tar.gz
 OR use alternate method from here https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html
 
 ## Run tests
-Creates 'customers' table in local DB if doesn't exist
+TBD
 
 `./gradlew test`
 
 ## Run app
 Creates 'customers' table in local DB if doesn't exist
 
-`./gradlew bootRun`
-
-## Import Postman collection
-`AWS v2 DynamoDB.postman_collection.json`
-
+TBD
 
 
 ### Reference Documentation
