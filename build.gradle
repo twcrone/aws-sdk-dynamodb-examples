@@ -1,0 +1,19 @@
+plugins {
+	id 'java'
+}
+
+group = 'com.twcrone'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+	maven {
+		url 'https://s3-us-west-2.amazonaws.com/dynamodb-local/release'
+	}
+}
+
+dependencies {
+	implementation platform('software.amazon.awssdk:bom:2.15.0')
+	implementation 'software.amazon.awssdk:dynamodb'
+}
