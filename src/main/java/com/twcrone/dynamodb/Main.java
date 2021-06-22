@@ -1,4 +1,4 @@
-package com.twcrone.awsv2dynamoDBsample;
+package com.twcrone.dynamodb;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 // snippet-end:[dynamoasyn.java2.get_item.import]
 
-public class DynamoDBAsyncGetItem {
+public class Main {
 
     public static void main(String[] args) {
 
@@ -36,7 +36,7 @@ public class DynamoDBAsyncGetItem {
         String key = "customerId";
 
         // TODO: Change to an ID in YOUR AWS "customers" db
-        String keyVal = "ae04d82e-8210-4edd-9ab9-1dc9e2a1b8af";
+        String keyVal = "59e4d00e-bb52-4b2d-939a-a17be29181b7";
 
         // TODO: Change to YOUR db region
         Region region = Region.US_EAST_1;
