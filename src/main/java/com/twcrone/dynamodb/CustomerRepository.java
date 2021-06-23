@@ -113,6 +113,7 @@ public class CustomerRepository {
         }
     }
 
+    @Trace(async = true)
     public Flux<Customer> listCustomers() {
 
         ScanRequest scanRequest = ScanRequest.builder()

@@ -31,8 +31,11 @@ public class AwsTransactions {
                     .map(AwsTransactions::moveToBarcelona)
                     .flatMap(repository::updateCustomer)
                     .flatMap(repository::deleteCustomer)
-                    .toStream()
-                    .collect(Collectors.toList());
+                    .collectList().block();
+
+            repository.listCustomers()
+                    .doOnEach(System.out::println)
+                    .collectList().block();
 
             System.out.println(ids);
         } catch (Exception e) {
