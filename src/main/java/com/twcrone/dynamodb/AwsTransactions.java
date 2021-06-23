@@ -1,14 +1,9 @@
 package com.twcrone.dynamodb;
 
 import com.newrelic.api.agent.Trace;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
-import software.amazon.awssdk.services.dynamodb.model.*;
+import reactor.core.publisher.Flux;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class AwsTransactions {
@@ -22,10 +17,32 @@ public class AwsTransactions {
     public void run() {
         try {
             //System.out.format("Retrieving item \"%s\" from \"%s\"\n", keyVal, tableName );
-            repository.getItem("ID");
-        }
-        catch (Exception e) {
+            System.out.println("Processing java devs...");
+            List<String> ids = Flux.just(
+                    new Customer("Jason", "jason@nr.com", "Portland"),
+                    new Customer("Xi Xia", "xixia@nr.com", "Portland"),
+                    new Customer("Brad", "brad@nr.com", "Portland"),
+                    new Customer("André", "andre@nr.com", "Virginia"),
+                    new Customer("Kevyn", "kevyn@nr.com", "Jersey"),
+                    new Customer("Chinmay", "chinmay@nr.com", "Berkley"),
+                    new Customer("Todd", "todd@nr.com", "Triangle"))
+                    .flatMap(repository::createCustomer)
+                    .flatMap((dev) -> repository.getCustomer(dev.getId()))
+                    .map(AwsTransactions::moveToBarcelona)
+                    .flatMap(repository::updateCustomer)
+                    .flatMap(repository::deleteCustomer)
+                    .toStream()
+                    .collect(Collectors.toList());
+
+            System.out.println(ids);
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static Customer moveToBarcelona(Customer customer) {
+        System.out.println("Moving " + customer.getName() + " to Barcelona");
+        customer.setCity("Barcelona");
+        return customer;
     }
 }

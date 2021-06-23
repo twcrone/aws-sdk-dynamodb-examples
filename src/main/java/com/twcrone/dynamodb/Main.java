@@ -20,7 +20,7 @@ public class Main {
         CustomerRepository repository = new CustomerRepository(client);
         System.out.println("*** Creating table if needed ***");
         repository.createTableIfNeeded();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 25; i++) {
             new AwsTransactions(repository).run();
             Thread.sleep(3000);
         }

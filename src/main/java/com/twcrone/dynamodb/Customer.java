@@ -6,6 +6,14 @@ public class Customer {
     private String email;
     private String city;
 
+    public Customer() {}
+
+    public Customer(String name, String email, String city) {
+        this.name = name;
+        this.email = email;
+        this.city = city;
+    }
+
     public String getId() {
         return id;
     }

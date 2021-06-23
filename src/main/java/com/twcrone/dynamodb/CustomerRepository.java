@@ -1,6 +1,8 @@
 package com.twcrone.dynamodb;
 
 import com.newrelic.api.agent.Trace;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
@@ -9,12 +11,15 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbAsyncWaiter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class CustomerRepository {
-    private final String TABLE_NAME = "customers";
+    private final static String CUSTOMER_TABLE = "my_customers";
+    private final static String KEY = "customerId";
+
     private final DynamoDbAsyncClient client;
 
     public CustomerRepository(DynamoDbAsyncClient client) {
@@ -27,7 +32,7 @@ public class CustomerRepository {
 
         CompletableFuture<CreateTableResponse> createTableRequest = listTableResponse
                 .thenCompose(response -> {
-                    boolean tableExist = response.tableNames().contains("customers");
+                    boolean tableExist = response.tableNames().contains(CUSTOMER_TABLE);
                     if (!tableExist) {
                         return createTable(client);
                     } else {
@@ -40,7 +45,7 @@ public class CustomerRepository {
         createTableRequest.get();
 
         // Wait for full table creation on AWS before returning
-        DescribeTableRequest tableRequest = DescribeTableRequest.builder().tableName(TABLE_NAME).build();
+        DescribeTableRequest tableRequest = DescribeTableRequest.builder().tableName(CUSTOMER_TABLE).build();
         DynamoDbAsyncWaiter dbWaiter = client.waiter();
         CompletableFuture<WaiterResponse<DescribeTableResponse>> waiterResponse =
                 dbWaiter.waitUntilTableExists(tableRequest);
@@ -49,13 +54,12 @@ public class CustomerRepository {
         response.matched().response().ifPresent(System.out::println);
     }
 
-    @Trace(dispatcher = true)
     public void getItem(String uuid) {
 
         HashMap<String, AttributeValue> keyToGet =
                 new HashMap<String, AttributeValue>();
 
-        keyToGet.put("customerId", AttributeValue.builder()
+        keyToGet.put(KEY, AttributeValue.builder()
                 .s(uuid).build());
 
         try {
@@ -63,7 +67,7 @@ public class CustomerRepository {
             // Create a GetItemRequest instance
             GetItemRequest request = GetItemRequest.builder()
                     .key(keyToGet)
-                    .tableName(TABLE_NAME)
+                    .tableName(CUSTOMER_TABLE)
                     .build();
 
             // Invoke the DynamoDbAsyncClient object's getItem
@@ -83,12 +87,12 @@ public class CustomerRepository {
         // snippet-end:[dynamoasyc.java2.get_item.main]
     }
 
-    private static CompletableFuture<CreateTableResponse> createTable(DynamoDbAsyncClient client) {
+    private CompletableFuture<CreateTableResponse> createTable(DynamoDbAsyncClient client) {
 
         CreateTableRequest request = CreateTableRequest.builder()
-                .tableName("customers")
-                .keySchema(KeySchemaElement.builder().attributeName("customerId").keyType(KeyType.HASH).build())
-                .attributeDefinitions(AttributeDefinition.builder().attributeName("customerId").attributeType(ScalarAttributeType.S).build())
+                .tableName(CUSTOMER_TABLE)
+                .keySchema(KeySchemaElement.builder().attributeName(KEY).keyType(KeyType.HASH).build())
+                .attributeDefinitions(AttributeDefinition.builder().attributeName(KEY).attributeType(ScalarAttributeType.S).build())
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .build();
 
@@ -97,16 +101,78 @@ public class CustomerRepository {
 
     public void deleteTable() {
         DeleteTableRequest request = DeleteTableRequest.builder()
-                .tableName(TABLE_NAME)
+                .tableName(CUSTOMER_TABLE)
                 .build();
         try {
             CompletableFuture<DeleteTableResponse> future = client.deleteTable(request);
             DeleteTableResponse response = future.get();
         } catch (DynamoDbException e) {
             System.err.println(e.getMessage());
-            System.exit(1);
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
     }
+
+    public Flux<Customer> listCustomers() {
+
+        ScanRequest scanRequest = ScanRequest.builder()
+                .tableName(CUSTOMER_TABLE)
+                .build();
+
+        return Mono.fromCompletionStage(client.scan(scanRequest))
+                .map(ScanResponse::items)
+                .map(CustomerMapper::fromList)
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    @Trace(async = true)
+    public Mono<Customer> createCustomer(Customer customer) {
+
+        customer.setId(UUID.randomUUID().toString());
+
+        PutItemRequest putItemRequest = PutItemRequest.builder()
+                .tableName(CUSTOMER_TABLE)
+                .item(CustomerMapper.toMap(customer))
+                .build();
+
+        return Mono.fromCompletionStage(client.putItem(putItemRequest))
+                .map(PutItemResponse::attributes)
+                .map(attributeValueMap -> customer);
+    }
+
+    public Mono<String> deleteCustomer(String customerId) {
+        DeleteItemRequest deleteItemRequest = DeleteItemRequest.builder()
+                .tableName(CUSTOMER_TABLE)
+                .key(Map.of("customerId", AttributeValue.builder().s(customerId).build()))
+                .build();
+
+        return Mono.fromCompletionStage(client.deleteItem(deleteItemRequest))
+                .map(DeleteItemResponse::attributes)
+                .map(attributeValueMap -> customerId);
+    }
+
+    @Trace(async = true)
+    public Mono<Customer> getCustomer(String customerId) {
+        GetItemRequest getItemRequest = GetItemRequest.builder()
+                .tableName(CUSTOMER_TABLE)
+                .key(Map.of("customerId", AttributeValue.builder().s(customerId).build()))
+                .build();
+
+        return Mono.fromCompletionStage(client.getItem(getItemRequest))
+                .map(GetItemResponse::item)
+                .map(CustomerMapper::fromMap);
+    }
+
+    public Mono<String> updateCustomer(Customer customer) {
+
+        PutItemRequest putItemRequest = PutItemRequest.builder()
+                .tableName(CUSTOMER_TABLE)
+                .item(CustomerMapper.toMap(customer))
+                .build();
+
+        return Mono.fromCompletionStage(client.putItem(putItemRequest))
+                .map(updateItemResponse -> customer.getId());
+    }
+
+
 }
