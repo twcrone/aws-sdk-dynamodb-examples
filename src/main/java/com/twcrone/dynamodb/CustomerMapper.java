@@ -1,4 +1,4 @@
-package com.twcrone.awsv2dynamoDBsample;
+package com.twcrone.dynamodb;
 
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 

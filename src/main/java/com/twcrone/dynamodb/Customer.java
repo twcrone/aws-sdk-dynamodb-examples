@@ -1,4 +1,4 @@
-package com.twcrone.awsv2dynamoDBsample;
+package com.twcrone.dynamodb;
 
 public class Customer {
     private String id;
