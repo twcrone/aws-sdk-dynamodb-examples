@@ -1,17 +1,20 @@
 package com.twcrone.dynamodb;
 
+import com.twcrone.awsv2dynamoDBsample.CustomerRepository;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 // snippet-end:[dynamoasyn.java2.get_item.import]
 
 public class Main {
+
+    private static CustomerRepository repository;
 
     public static void main(String[] args) {
 
@@ -44,8 +47,18 @@ public class Main {
                 .region(region)
                 .build();
 
-        System.out.format("Retrieving item \"%s\" from \"%s\"\n", keyVal, tableName );
-        getItem(client, tableName, key, keyVal);
+        repository = new CustomerRepository(client);
+        try {
+            repository.createTableIfNeeded();
+            System.out.format("Retrieving item \"%s\" from \"%s\"\n", keyVal, tableName );
+            getItem(client, tableName, key, keyVal);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            repository.deleteTable();
+        }
     }
 
     // snippet-start:[dynamoasyc.java2.get_item.main]
@@ -81,6 +94,21 @@ public class Main {
         }
         // snippet-end:[dynamoasyc.java2.get_item.main]
     }
+
+    private static CompletableFuture<CreateTableResponse> createTable(DynamoDbAsyncClient client) {
+
+        CreateTableRequest request = CreateTableRequest.builder()
+                .tableName("customers")
+
+                .keySchema(KeySchemaElement.builder().attributeName("customerId").keyType(KeyType.HASH).build())
+                .attributeDefinitions(AttributeDefinition.builder().attributeName("customerId").attributeType(ScalarAttributeType.S).build())
+                .billingMode(BillingMode.PAY_PER_REQUEST)
+                .build();
+
+        return client.createTable(request);
+    }
+
+
 }
 
 // snippet-end:[dynamodb.Java.DynamoDBAsyncGetItem.complete]
