@@ -49,6 +49,7 @@ public class Main {
 
         repository = new CustomerRepository(client);
         try {
+            System.out.println("*** Creating table ***");
             repository.createTableIfNeeded();
             System.out.format("Retrieving item \"%s\" from \"%s\"\n", keyVal, tableName );
             getItem(client, tableName, key, keyVal);
@@ -57,6 +58,7 @@ public class Main {
             e.printStackTrace();
         }
         finally {
+            System.out.print("*** Deleting table ***");
             repository.deleteTable();
         }
     }
