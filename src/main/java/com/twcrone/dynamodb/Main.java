@@ -14,7 +14,7 @@ public class Main {
         CustomerRepository repository = new CustomerRepository(client);
         System.out.println("*** Creating table if needed ***");
         repository.createTableIfNeeded();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 100; i++) {
             new AwsTransactions(repository).run();
             System.out.println("Run " + (i + 1) + " completed");
             Thread.sleep(3000);

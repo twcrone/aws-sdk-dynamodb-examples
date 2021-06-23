@@ -4,7 +4,6 @@ import com.newrelic.api.agent.Trace;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AwsTransactions {
     private final CustomerRepository repository;
@@ -13,7 +12,6 @@ public class AwsTransactions {
         this.repository = customerRepository;
     }
 
-    @Trace(dispatcher = true)
     public void run() {
         try {
             //System.out.format("Retrieving item \"%s\" from \"%s\"\n", keyVal, tableName );

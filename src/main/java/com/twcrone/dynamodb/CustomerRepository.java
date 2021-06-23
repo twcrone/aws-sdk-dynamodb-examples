@@ -113,9 +113,9 @@ public class CustomerRepository {
         }
     }
 
-    @Trace(async = true)
+    @Trace(dispatcher = true)
     public Flux<Customer> listCustomers() {
-
+        System.out.println("Getting all customers...");
         ScanRequest scanRequest = ScanRequest.builder()
                 .tableName(CUSTOMER_TABLE)
                 .build();
@@ -126,9 +126,9 @@ public class CustomerRepository {
                 .flatMapMany(Flux::fromIterable);
     }
 
-    @Trace(async = true)
+    @Trace(dispatcher = true)
     public Mono<Customer> createCustomer(Customer customer) {
-
+        System.out.println("Creating " + customer.getName());
         customer.setId(UUID.randomUUID().toString());
 
         PutItemRequest putItemRequest = PutItemRequest.builder()
@@ -141,7 +141,9 @@ public class CustomerRepository {
                 .map(attributeValueMap -> customer);
     }
 
+    @Trace(dispatcher = true)
     public Mono<String> deleteCustomer(String customerId) {
+        System.out.println("Deleting " + customerId);
         DeleteItemRequest deleteItemRequest = DeleteItemRequest.builder()
                 .tableName(CUSTOMER_TABLE)
                 .key(Map.of("customerId", AttributeValue.builder().s(customerId).build()))
@@ -152,8 +154,9 @@ public class CustomerRepository {
                 .map(attributeValueMap -> customerId);
     }
 
-    @Trace(async = true)
+    @Trace(dispatcher = true)
     public Mono<Customer> getCustomer(String customerId) {
+        System.out.println("Fetching " + customerId);
         GetItemRequest getItemRequest = GetItemRequest.builder()
                 .tableName(CUSTOMER_TABLE)
                 .key(Map.of("customerId", AttributeValue.builder().s(customerId).build()))
@@ -164,8 +167,9 @@ public class CustomerRepository {
                 .map(CustomerMapper::fromMap);
     }
 
+    @Trace(dispatcher = true)
     public Mono<String> updateCustomer(Customer customer) {
-
+        System.out.println("Updating " + customer.getName());
         PutItemRequest putItemRequest = PutItemRequest.builder()
                 .tableName(CUSTOMER_TABLE)
                 .item(CustomerMapper.toMap(customer))
@@ -174,6 +178,4 @@ public class CustomerRepository {
         return Mono.fromCompletionStage(client.putItem(putItemRequest))
                 .map(updateItemResponse -> customer.getId());
     }
-
-
 }
