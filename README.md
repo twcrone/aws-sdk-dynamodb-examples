@@ -14,6 +14,9 @@ TBD
 
 `./gradlew test`
 
+## Build add
+`./gradlew shadowJar`
+
 ## Run app
 Creates 'customers' table in local DB if doesn't exist
 
