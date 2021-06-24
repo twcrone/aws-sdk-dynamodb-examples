@@ -81,20 +81,6 @@ public class CustomerRepository {
         return CustomerMapper.fromList(client.scan(scanRequest).items());
     }
 
-//
-//    @Trace(dispatcher = true)
-//    public Flux<Customer> listCustomers() {
-//        System.out.println("Getting all customers...");
-//        ScanRequest scanRequest = ScanRequest.builder()
-//                .tableName(CUSTOMER_TABLE)
-//                .build();
-//
-//        return Mono.fromCompletionStage(client.scan(scanRequest))
-//                .map(ScanResponse::items)
-//                .map(CustomerMapper::fromList)
-//                .flatMapMany(Flux::fromIterable);
-//    }
-//
 //    @Trace(dispatcher = true)
 //    public Mono<Customer> createCustomer(Customer customer) {
 //        System.out.println("Creating " + customer.getName());
