@@ -26,6 +26,7 @@ public class V1SyncCustomerRepository implements CustomerRepository {
                 .build();
     }
 
+    @Trace(dispatcher = true)
     public void createTableIfNeeded() {
         if (tableExists()) {
             return;

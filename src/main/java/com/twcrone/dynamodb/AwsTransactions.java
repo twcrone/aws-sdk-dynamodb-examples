@@ -12,7 +12,7 @@ public class AwsTransactions {
     public void run() throws InterruptedException {
         System.out.println("*** Creating table if needed ***");
         repository.createTableIfNeeded();
-        for (int i = 0; i < 25; i++) {
+        for (int i = 0; i < 10; i++) {
             runTransactions();
             System.out.println("Run " + (i + 1) + " completed");
             Thread.sleep(3000);

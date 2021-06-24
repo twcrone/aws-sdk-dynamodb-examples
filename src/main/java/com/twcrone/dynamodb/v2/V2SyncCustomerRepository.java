@@ -25,20 +25,26 @@ public class V2SyncCustomerRepository implements CustomerRepository {
 
     @Trace(dispatcher = true)
     public void createTableIfNeeded() {
+        if(tableExists()) {
+            return;
+        }
+        createTable();
+        waitForTable();
+    }
+
+    private void waitForTable() {
+        // Wait for full table creation on AWS before returning
+        DescribeTableRequest tableRequest = DescribeTableRequest.builder().tableName(CUSTOMER_TABLE).build();
+        DynamoDbWaiter dbWaiter = client.waiter();
+        WaiterResponse<DescribeTableResponse> waiterResponse =
+                dbWaiter.waitUntilTableExists(tableRequest);
+        waiterResponse.matched().response().ifPresent(System.out::println);
+    }
+
+    private boolean tableExists() {
         ListTablesRequest request = ListTablesRequest.builder().build();
         ListTablesResponse listTableResponse = client.listTables(request);
-
-        if(!listTableResponse.tableNames().contains(CUSTOMER_TABLE)) {
-            createTable();
-
-            // Wait for full table creation on AWS before returning
-            DescribeTableRequest tableRequest = DescribeTableRequest.builder().tableName(CUSTOMER_TABLE).build();
-            DynamoDbWaiter dbWaiter = client.waiter();
-            WaiterResponse<DescribeTableResponse> waiterResponse =
-                    dbWaiter.waitUntilTableExists(tableRequest);
-            waiterResponse.matched().response().ifPresent(System.out::println);
-        }
-
+        return listTableResponse.tableNames().contains(CUSTOMER_TABLE);
     }
 
     @Trace(dispatcher = true)

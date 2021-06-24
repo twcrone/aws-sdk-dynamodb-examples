@@ -12,12 +12,11 @@ public class Main {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         System.out.println("*** V1 Sync Transactions ");
         new AwsTransactions(new V1SyncCustomerRepository()).run();
-        System.out.println("Waiting to make room for next simulations...");
 
+        System.out.println("Waiting to make room for next simulations...");
         Thread.sleep(30000);
 
         System.out.println("*** V2 Sync Transactions ");
         new AwsTransactions(new V2SyncCustomerRepository()).run();
-        System.out.println("Waiting to make room for next simulations...");
     }
 }
