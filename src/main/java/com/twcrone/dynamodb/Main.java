@@ -1,6 +1,7 @@
 package com.twcrone.dynamodb;
 
-import com.twcrone.dynamodb.sync.CustomerRepository;
+import com.twcrone.dynamodb.sync.V2SyncCustomerRepository;
+import com.twcrone.dynamodb.v1.V1SyncCustomerRepository;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
@@ -12,7 +13,8 @@ public class Main {
         DynamoDbClient client = DynamoDbClient.builder()
                 .region(Region.US_EAST_1)
                 .build();
-        CustomerRepository repository = new CustomerRepository(client);
+
+        V1SyncCustomerRepository repository = new V1SyncCustomerRepository();
         System.out.println("*** Creating table if needed ***");
         repository.createTableIfNeeded();
         for (int i = 0; i < 25; i++) {

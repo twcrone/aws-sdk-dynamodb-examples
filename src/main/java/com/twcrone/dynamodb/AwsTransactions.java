@@ -1,7 +1,6 @@
 package com.twcrone.dynamodb;
 
-import com.twcrone.dynamodb.sync.CustomerRepository;
-import reactor.core.publisher.Flux;
+import com.twcrone.dynamodb.sync.V2SyncCustomerRepository;
 
 import java.util.List;
 

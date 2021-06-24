@@ -17,13 +17,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-public class CustomerRepository {
+public class V2SyncCustomerRepository {
     private final static String CUSTOMER_TABLE = "my_customers";
     private final static String KEY = "customerId";
 
     private final DynamoDbClient client;
 
-    public CustomerRepository(DynamoDbClient client) {
+    public V2SyncCustomerRepository(DynamoDbClient client) {
         this.client = client;
     }
 
