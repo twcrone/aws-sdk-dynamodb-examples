@@ -1,14 +1,14 @@
-package com.twcrone.dynamodb;
+package com.twcrone.dynamodb.async;
 
-import com.twcrone.dynamodb.sync.CustomerRepository;
+import com.twcrone.dynamodb.Customer;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
 
 public class AwsTransactions {
-    private final CustomerRepository repository;
+    private final CustomerAsyncRepository repository;
 
-    public AwsTransactions(CustomerRepository customerRepository) {
+    public AwsTransactions(CustomerAsyncRepository customerRepository) {
         this.repository = customerRepository;
     }
 
@@ -32,27 +32,31 @@ public class AwsTransactions {
                     .flatMap(repository::deleteCustomer)
                     .collectList().block();
 */
-            List<Customer> devs = repository.listCustomers();
-//                    new Customer("Jason", "jason@nr.com", "Portland"),
-//                    new Customer("Xi Xia", "xixia@nr.com", "Portland"),
-//                    new Customer("Brad", "brad@nr.com", "Portland"),
-//                    new Customer("André", "andre@nr.com", "Virginia"),
-//                    new Customer("Kevyn", "kevyn@nr.com", "Jersey"),
-//                    new Customer("Chinmay", "chinmay@nr.com", "Berkley"),
-//                    new Customer("Todd", "todd@nr.com", "Triangle"))
-//                    .flatMap(repository::createCustomer)
-//                    .collectList()
-//                    .block();
+            List<Customer> devs = Flux.just(
+                    new Customer("Jason", "jason@nr.com", "Portland"),
+                    new Customer("Xi Xia", "xixia@nr.com", "Portland"),
+                    new Customer("Brad", "brad@nr.com", "Portland"),
+                    new Customer("André", "andre@nr.com", "Virginia"),
+                    new Customer("Kevyn", "kevyn@nr.com", "Jersey"),
+                    new Customer("Chinmay", "chinmay@nr.com", "Berkley"),
+                    new Customer("Todd", "todd@nr.com", "Triangle"))
+                    .flatMap(repository::createCustomer)
+                    .collectList()
+                    .block();
 
             Thread.sleep(3000);
 
-//            Thread.sleep(3000);
+            repository.listCustomers()
+                    .doOnEach(System.out::println)
+                    .collectList().block();
 
-//            Flux.fromIterable(devs)
-//                    .map(Customer::getId)
-//                    .flatMap(repository::deleteCustomer)
-//                    .collectList()
-//                    .block();
+            Thread.sleep(3000);
+
+            Flux.fromIterable(devs)
+                    .map(Customer::getId)
+                    .flatMap(repository::deleteCustomer)
+                    .collectList()
+                    .block();
             //System.out.println(ids);
         } catch (Exception e) {
             e.printStackTrace();

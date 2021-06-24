@@ -12,10 +12,7 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbAsyncWaiter;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -73,6 +70,17 @@ public class CustomerRepository {
             System.err.println(e.getMessage());
         }
     }
+
+    @Trace(dispatcher = true)
+    public List<Customer> listCustomers() {
+        System.out.println("Getting all customers...");
+        ScanRequest scanRequest = ScanRequest.builder()
+                .tableName(CUSTOMER_TABLE)
+                .build();
+
+        return CustomerMapper.fromList(client.scan(scanRequest).items());
+    }
+
 //
 //    @Trace(dispatcher = true)
 //    public Flux<Customer> listCustomers() {

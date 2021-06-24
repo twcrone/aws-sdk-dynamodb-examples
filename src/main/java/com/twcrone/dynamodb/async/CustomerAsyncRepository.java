@@ -1,6 +1,8 @@
-package com.twcrone.dynamodb;
+package com.twcrone.dynamodb.async;
 
 import com.newrelic.api.agent.Trace;
+import com.twcrone.dynamodb.Customer;
+import com.twcrone.dynamodb.CustomerMapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
@@ -71,7 +73,7 @@ public class CustomerAsyncRepository {
                     .build();
 
             // Invoke the DynamoDbAsyncClient object's getItem
-            java.util.Collection<software.amazon.awssdk.services.dynamodb.model.AttributeValue> returnedItem = client.getItem(request).join().item().values();
+            java.util.Collection<AttributeValue> returnedItem = client.getItem(request).join().item().values();
 
             // Convert Set to Map
             Map<String, AttributeValue> map = returnedItem.stream().collect(Collectors.toMap(AttributeValue::s, s->s));
