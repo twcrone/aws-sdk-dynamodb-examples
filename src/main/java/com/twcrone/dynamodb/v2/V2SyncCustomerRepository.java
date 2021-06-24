@@ -1,40 +1,35 @@
-package com.twcrone.dynamodb.sync;
+package com.twcrone.dynamodb.v2;
 
 import com.newrelic.api.agent.Trace;
 import com.twcrone.dynamodb.Customer;
-import com.twcrone.dynamodb.CustomerMapper;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import com.twcrone.dynamodb.CustomerRepository;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
-import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbAsyncWaiter;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
+import java.util.List;
 
-public class V2SyncCustomerRepository {
+public class V2SyncCustomerRepository implements CustomerRepository {
     private final static String CUSTOMER_TABLE = "my_customers";
     private final static String KEY = "customerId";
 
     private final DynamoDbClient client;
 
-    public V2SyncCustomerRepository(DynamoDbClient client) {
-        this.client = client;
+    public V2SyncCustomerRepository() {
+        this.client = DynamoDbClient.builder()
+                .region(Region.US_EAST_1)
+                .build();
     }
 
     @Trace(dispatcher = true)
-    public void createTableIfNeeded() throws ExecutionException, InterruptedException {
+    public void createTableIfNeeded() {
         ListTablesRequest request = ListTablesRequest.builder().build();
         ListTablesResponse listTableResponse = client.listTables(request);
 
         if(!listTableResponse.tableNames().contains(CUSTOMER_TABLE)) {
-            CreateTableResponse createTableResponse = createTable();
-            System.out.println(createTableResponse.tableDescription());
+            createTable();
 
             // Wait for full table creation on AWS before returning
             DescribeTableRequest tableRequest = DescribeTableRequest.builder().tableName(CUSTOMER_TABLE).build();
@@ -47,7 +42,7 @@ public class V2SyncCustomerRepository {
     }
 
     @Trace(dispatcher = true)
-    private CreateTableResponse createTable() {
+    public void createTable() {
 
         CreateTableRequest request = CreateTableRequest.builder()
                 .tableName(CUSTOMER_TABLE)
@@ -56,7 +51,7 @@ public class V2SyncCustomerRepository {
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .build();
 
-        return client.createTable(request);
+        client.createTable(request);
     }
 
     @Trace(dispatcher = true)
@@ -79,6 +74,26 @@ public class V2SyncCustomerRepository {
                 .build();
 
         return CustomerMapper.fromList(client.scan(scanRequest).items());
+    }
+
+    @Override
+    public Customer createCustomer(Customer customer) {
+        return null;
+    }
+
+    @Override
+    public Customer getCustomer(String id) {
+        return null;
+    }
+
+    @Override
+    public Customer updateCustomer(Customer customer) {
+        return null;
+    }
+
+    @Override
+    public Customer deleteCustomer(String id) {
+        return null;
     }
 
 //    @Trace(dispatcher = true)

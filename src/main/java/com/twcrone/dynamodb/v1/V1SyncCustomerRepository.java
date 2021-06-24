@@ -27,13 +27,31 @@ public class V1SyncCustomerRepository implements CustomerRepository {
     }
 
     public void createTableIfNeeded() {
-        List<String> tableNames = client.listTables().getTableNames();
-
-        if (tableNames.contains(TABLE_NAME)) {
+        if (tableExists()) {
             return;
         }
-
         createTable();
+        waitForTable();
+    }
+
+    private void waitForTable() {
+        int count = 0;
+        try {
+            while (!tableExists()) {
+                if(++count > 10) {
+                    throw new RuntimeException("Table took to long to create");
+                }
+                System.out.println("Waiting on table..." + count);
+                Thread.sleep(3000);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean tableExists() {
+        List<String> tableNames = client.listTables().getTableNames();
+        return tableNames.contains(TABLE_NAME);
     }
 
     @Trace(dispatcher = true)

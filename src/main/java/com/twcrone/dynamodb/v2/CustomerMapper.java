@@ -1,5 +1,6 @@
-package com.twcrone.dynamodb;
+package com.twcrone.dynamodb.v2;
 
+import com.twcrone.dynamodb.Customer;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.List;

@@ -2,7 +2,7 @@ package com.twcrone.dynamodb.async;
 
 import com.newrelic.api.agent.Trace;
 import com.twcrone.dynamodb.Customer;
-import com.twcrone.dynamodb.CustomerMapper;
+import com.twcrone.dynamodb.v2.CustomerMapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.core.waiters.WaiterResponse;

@@ -1,7 +1,5 @@
 package com.twcrone.dynamodb;
 
-import com.twcrone.dynamodb.sync.V2SyncCustomerRepository;
-
 import java.util.List;
 
 public class AwsTransactions {
@@ -11,7 +9,19 @@ public class AwsTransactions {
         this.repository = customerRepository;
     }
 
-    public void run() {
+    public void run() throws InterruptedException {
+        System.out.println("*** Creating table if needed ***");
+        repository.createTableIfNeeded();
+        for (int i = 0; i < 25; i++) {
+            runTransactions();
+            System.out.println("Run " + (i + 1) + " completed");
+            Thread.sleep(3000);
+        }
+        System.out.println("*** Deleting table ***");
+        repository.deleteTable();
+    }
+
+    private void runTransactions() {
         try {
             //System.out.format("Retrieving item \"%s\" from \"%s\"\n", keyVal, tableName );
             System.out.println("Processing java devs...");

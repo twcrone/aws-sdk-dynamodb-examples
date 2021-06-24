@@ -1,7 +1,7 @@
 package com.twcrone.dynamodb;
 
-import com.twcrone.dynamodb.sync.V2SyncCustomerRepository;
 import com.twcrone.dynamodb.v1.V1SyncCustomerRepository;
+import com.twcrone.dynamodb.v2.V2SyncCustomerRepository;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
@@ -10,19 +10,14 @@ import java.util.concurrent.ExecutionException;
 public class Main {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        DynamoDbClient client = DynamoDbClient.builder()
-                .region(Region.US_EAST_1)
-                .build();
+        System.out.println("*** V1 Sync Transactions ");
+        new AwsTransactions(new V1SyncCustomerRepository()).run();
+        System.out.println("Waiting to make room for next simulations...");
 
-        V1SyncCustomerRepository repository = new V1SyncCustomerRepository();
-        System.out.println("*** Creating table if needed ***");
-        repository.createTableIfNeeded();
-        for (int i = 0; i < 25; i++) {
-            new AwsTransactions(repository).run();
-            System.out.println("Run " + (i + 1) + " completed");
-            Thread.sleep(3000);
-        }
-        System.out.println("*** Deleting table ***");
-        repository.deleteTable();
+        Thread.sleep(30000);
+
+        System.out.println("*** V2 Sync Transactions ");
+        new AwsTransactions(new V2SyncCustomerRepository()).run();
+        System.out.println("Waiting to make room for next simulations...");
     }
 }
