@@ -36,17 +36,10 @@ public class V1SyncCustomerRepository implements CustomerRepository {
     }
 
     private void waitForTable() {
-        int count = 0;
         try {
-            while (!tableExists()) {
-                if(++count > 10) {
-                    throw new RuntimeException("Table took to long to create");
-                }
-                System.out.println("Waiting on table..." + count);
-                Thread.sleep(3000);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            Thread.sleep(15000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
